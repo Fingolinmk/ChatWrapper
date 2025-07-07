@@ -29,7 +29,7 @@ httptools==0.6.1
 httpx==0.27.0
 idna==3.7
 iniconfig==2.0.0
-Jinja2==3.1.4
+Jinja2==3.1.6
 Levenshtein
 keras
 libclang==18.1.1
