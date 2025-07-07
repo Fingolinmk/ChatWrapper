@@ -6,9 +6,14 @@ import useTokenExpiryCheck from '../store/useStore';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './globals.css'
 import LoginPage from './login/page';
+import React from 'react';
 
-const Layout = ({ children }) => {
-  const { token,  } = useAuthStore();
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const { token } = useAuthStore();
   useTokenExpiryCheck();
   const pathname = usePathname();
   const isLoginPage = pathname === '/login';
