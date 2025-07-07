@@ -48,7 +48,7 @@ const LoginPage = () => {
       </div>
       <button className="btn btn-primary" onClick={handleLogin}>Login</button>
       <div className="mt-3">
-        <p>Don't have an account? <a href="/register">Register here</a></p>
+        <p>Don&#39;t have an account? <a href="/register">Register here</a></p>
       </div>
     </div>
   );

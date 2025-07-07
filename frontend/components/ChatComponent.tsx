@@ -10,12 +10,23 @@ interface ChatComponentProps {
   conversationId: number;
 }
 
+interface Message {
+  role: string;
+  content: string;
+}
+
+interface Model {
+  id: number;
+  name: string;
+  description: string;
+}
+
 const ChatComponent: React.FC<ChatComponentProps> = ({ conversationId }) => {
-  const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [apiKey, setApiKey] = useState(''); // API key for the selected model
   const [selectedModel, setSelectedModel] = useState('');
-  const [models, setModels] = useState<{ id: number; name: string; description: string }[]>([]);
+  const [models, setModels] = useState<Model[]>([]);
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [title, setTitle] = useState(''); // Chat title
   const [isEditingTitle, setIsEditingTitle] = useState(false); // Editing title state
@@ -86,7 +97,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ conversationId }) => {
         if (response.ok) {
           const data = await response.json();
           setTitle(data.title);
-          setMessages(data.messages.map((msg: any) => ({ role: msg.role, content: msg.content })));
+          setMessages(data.messages.map((msg: Message) => ({ role: msg.role, content: msg.content })));
         } else {
           console.error('Error fetching conversation:', response.statusText);
         }

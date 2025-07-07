@@ -1,6 +1,5 @@
 // frontend/app/layout.tsx
 "use client";
-import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import useAuthStore from '../store/auth';
 import useTokenExpiryCheck from '../store/useStore';
@@ -9,20 +8,11 @@ import './globals.css'
 import LoginPage from './login/page';
 
 const Layout = ({ children }) => {
-  const { token, clearToken } = useAuthStore();
+  const { token,  } = useAuthStore();
   useTokenExpiryCheck();
   const pathname = usePathname();
   const isLoginPage = pathname === '/login';
   const isRegisterPage = pathname === '/register';
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
-
-  const handleLogout = () => {
-    clearToken();
-  };
-
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
 
   return (
     <html lang="en">
