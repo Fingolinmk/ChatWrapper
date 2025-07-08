@@ -16,11 +16,7 @@ WORKDIR /app
 
 COPY --from=builder /app /app
 
-COPY requirements.txt ./requirements.txt
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
-
-CMD ["uvicorn", "main:app", "--port=8000", "--host", "0.0.0.0"]
+CMD ["fastapi", "dev", "--port=8000", "--host", "0.0.0.0"]
 
 # Stage 3: Production environment
 FROM python:3.12-slim AS prod
@@ -29,8 +25,4 @@ WORKDIR /app
 
 COPY --from=builder /app /app
 
-COPY requirements.txt ./requirements.txt
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
-
-CMD ["uvicorn", "main:app", "--port=8000", "--host", "0.0.0.0"]
+CMD ["fastapi", "run","main.py", "--port=8000", "--host", "0.0.0.0"]
