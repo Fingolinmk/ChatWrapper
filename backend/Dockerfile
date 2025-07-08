@@ -14,7 +14,7 @@ FROM python:3.12-slim AS dev
 
 WORKDIR /app
 
-COPY --from=builder /app /app
+COPY --from=builder /app ./
 
 COPY requirements.txt ./requirements.txt
 RUN pip install --upgrade pip
@@ -27,7 +27,7 @@ FROM python:3.12-slim AS prod
 
 WORKDIR /app
 
-COPY --from=builder /app /app
+COPY --from=builder /app ./
 
 COPY requirements.txt ./requirements.txt
 RUN pip install --upgrade pip
