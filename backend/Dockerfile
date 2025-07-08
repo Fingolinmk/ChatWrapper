@@ -14,7 +14,7 @@ FROM python:3.12-slim AS dev
 
 WORKDIR /app
 
-COPY --from=builder /app /app
+COPY --from=builder /app /
 
 CMD ["fastapi", "dev", "--port=8000", "--host", "0.0.0.0"]
 
@@ -23,6 +23,6 @@ FROM python:3.12-slim AS prod
 
 WORKDIR /app
 
-COPY --from=builder /app /app
+COPY --from=builder /app /
 
 CMD ["fastapi", "run","main.py", "--port=8000", "--host", "0.0.0.0"]
