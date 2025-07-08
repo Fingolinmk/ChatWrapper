@@ -31,4 +31,4 @@ jobs:
         with:
           context: ./backend
           push: true
-          tags: ghcr.io/fingolinmk/backend:0.01
+          tags: ghcr.io/fingolinmk/backend:0.02
