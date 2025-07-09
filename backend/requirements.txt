@@ -58,7 +58,7 @@ Pygments==2.18.0
 pytest==8.2.2
 python-dotenv==1.0.1
 python-jose==3.3.0
-python-multipart==0.0.9
+python-multipart==0.0.18
 PyYAML==6.0.1
 regex==2024.5.15
 requests==2.32.3
