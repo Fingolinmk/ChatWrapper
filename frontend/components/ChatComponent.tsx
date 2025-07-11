@@ -37,7 +37,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ conversationId }) => {
     // Fetch models from the backend
     const fetchModels = async () => {
       try {
-        const response = await fetch(`${getBackendUrl()}/api/models`, {
+        const response = await fetch(`${getBackendUrl()}/api/models/`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
