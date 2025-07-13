@@ -3,7 +3,7 @@
 import useAuthStore from '@/store/auth';
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { FaPen } from 'react-icons/fa'; // Import the pen icon
+import { FaPen, FaBars, FaInfoCircle } from 'react-icons/fa'; // Import the pen, bars, and info icons
 import getBackendUrl from '@/utils/get_be';
 
 interface ChatComponentProps {
@@ -30,6 +30,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ conversationId }) => {
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [title, setTitle] = useState(''); // Chat title
   const [isEditingTitle, setIsEditingTitle] = useState(false); // Editing title state
+  const [isCollapsed, setIsCollapsed] = useState(true); // Collapse state
   const { token } = useAuthStore();
   const chatBoxRef = useRef<HTMLDivElement>(null);
 
@@ -208,7 +209,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ conversationId }) => {
   }
 
   return (
-    <div className="container flex-grow-1 mt-1" style={{ display: 'flex', flexDirection: 'column', maxHeight: '70vh', overflowY: 'scroll' }}>
+    <div className="container flex-grow-1 mt-1" style={{ display: 'flex', flexDirection: 'column', height: '90vh', overflowY: 'hidden' }}>
       <div className="d-flex align-items-center mb-3">
         {isEditingTitle ? (
           <input
@@ -220,16 +221,16 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ conversationId }) => {
             autoFocus
           />
         ) : (
-          <>
-            <h2>{title}</h2>
+          <div className="w-100" style={{ display: 'flex', flexDirection: 'row' }}>
+            <h2 className="flex-grow-1">{title}</h2>
             <FaPen className="ms-2" onClick={handleEditTitle} style={{ cursor: 'pointer' }} />
-          </>
+          </div>
         )}
       </div>
-      <div className="mb-3">
-        <label className="form-label">Select Model</label>
+      <div className="mb-3 d-flex align-items-center " style={{ display: 'flex', flexDirection: 'row' }}>
+        <label className="form-label me-2">Model</label>
         <select
-          className="form-select"
+          className="form-select me-2"
           value={selectedModel}
           onChange={(e) => setSelectedModel(e.target.value)}
         >
@@ -239,10 +240,19 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ conversationId }) => {
             </option>
           ))}
         </select>
-        <small className="form-content content-muted">
-          {models.find((model) => model.name === selectedModel)?.description}
-        </small>
+        <button
+          className="btn btn-secondary"
+          type="button"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+        >
+          <FaInfoCircle />
+        </button>
       </div>
+      {!isCollapsed && (
+        <div className="card card-body mb-3">
+          {models.find((model) => model.name === selectedModel)?.description}
+        </div>
+      )}
       <div className="chat-box flex-grow-1 border p-3" ref={chatBoxRef} style={{ overflowY: 'auto' }}>
         {messages.map((msg, index) => (
           <div key={index} className={`mb-2 ${msg.role === 'user' ? 'user-message' : 'chatbot-message'}`}>

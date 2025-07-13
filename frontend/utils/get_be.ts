@@ -1,4 +1,4 @@
 const getBackendUrl = () => {
-    return "backend"
+    return "http://192.168.178.164:8000"
 }
 export default getBackendUrl;
