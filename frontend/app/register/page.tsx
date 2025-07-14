@@ -14,7 +14,7 @@ const RegisterPage = () => {
 
   const handleRegister = async () => {
     // Replace with your actual registration API call
-    
+
     const response = await fetch(getBackendUrl() + '/api/users/', {
       method: 'POST',
       headers: {

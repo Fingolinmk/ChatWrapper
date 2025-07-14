@@ -23,11 +23,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <html lang="en">
       <body>
         <div className="d-flex flex-column min-vh-100">
-          <header className="bg-light p-3">
+          <header className="bg-light p-3 d-none d-md-block">
             <div className="container d-flex justify-content-between align-items-center">
-              <div className='min-vh-30'>
+              <div className='max-vh-15'>
                 <h1>Chat-Wrapper</h1>
-                <h5> the h is silent</h5>
+                <h5>the h is silent</h5>
               </div>
             </div>
           </header>
