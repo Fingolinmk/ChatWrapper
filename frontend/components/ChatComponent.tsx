@@ -3,7 +3,7 @@
 import useAuthStore from '@/store/auth';
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { FaPen, FaBars, FaInfoCircle } from 'react-icons/fa'; // Import the pen, bars, and info icons
+import { FaPen,  FaInfoCircle } from 'react-icons/fa'; // Import the pen, bars, and info icons
 import getBackendUrl from '@/utils/get_be';
 
 interface ChatComponentProps {
