@@ -17,6 +17,18 @@ class Message(MessageBase):
     class Config:
         from_attributes = True
 
+class ImageBase(BaseModel):
+    file_name: str
+    file_type: str
+
+class Image(ImageBase):
+    id: int
+    conversation_id: int
+    image_data: bytes  # Include the image blob
+
+    class Config:
+        from_attributes = True
+
 class ConversationBase(BaseModel):
     title: str
 
@@ -30,6 +42,7 @@ class Conversation(ConversationBase):
     id: int
     user_id: int
     messages: List[Message] = []
+    images: List[Image] = []
 
     class Config:
         from_attributes = True

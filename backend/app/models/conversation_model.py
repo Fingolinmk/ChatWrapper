@@ -11,4 +11,6 @@ class Conversation(Base):
     title = Column(String, index=True)
 
     user = relationship("User", back_populates="conversations")
+
     messages = relationship("Message", back_populates="conversation")
+    images = relationship("Image", back_populates="conversation")  # Use string reference

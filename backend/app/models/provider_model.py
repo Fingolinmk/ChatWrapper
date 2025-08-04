@@ -12,3 +12,4 @@ class Provider(Base):
 
     api_keys = relationship("APIKey", back_populates="provider")
     models = relationship("Model", back_populates="provider")
+    agents = relationship("Agent", back_populates="provider")

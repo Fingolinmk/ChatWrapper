@@ -1,10 +1,11 @@
-// components/ChatComponent.tsx
+// frontend/components/ChatComponent.tsx
 "use client";
 import useAuthStore from '@/store/auth';
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { FaPen,  FaInfoCircle } from 'react-icons/fa'; // Import the pen, bars, and info icons
+import { FaPen, FaRobot } from 'react-icons/fa'; // Import the pen, bars, info, and robot icons
 import getBackendUrl from '@/utils/get_be';
+import { Dropdown, DropdownButton } from 'react-bootstrap';
 
 interface ChatComponentProps {
   conversationId: number;
@@ -21,12 +22,20 @@ interface Model {
   description: string;
 }
 
+interface Agent {
+  id: string;
+  name: string;
+  description: string;
+}
+
 const ChatComponent: React.FC<ChatComponentProps> = ({ conversationId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [apiKey, setApiKey] = useState(''); // API key for the selected model
+  const [apiKey, setApiKey] = useState(''); // API key for the selected model or agent
   const [selectedModel, setSelectedModel] = useState('');
+  const [selectedAgent, setSelectedAgent] = useState('');
   const [models, setModels] = useState<Model[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [title, setTitle] = useState(''); // Chat title
   const [isEditingTitle, setIsEditingTitle] = useState(false); // Editing title state
@@ -35,27 +44,38 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ conversationId }) => {
   const chatBoxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Fetch models from the backend
-    const fetchModels = async () => {
+    // Fetch models and agents from the backend
+    const fetchModelsAndAgents = async () => {
       try {
-        const response = await fetch(`${getBackendUrl()}/api/models/`, {
+        const modelsResponse = await fetch(`${getBackendUrl()}/api/models/`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
         });
-        if (response.ok) {
-          const data = await response.json();
-          setModels(data);
-          setSelectedModel(data[0]?.name || '');
+        if (modelsResponse.ok) {
+          const modelsData = await modelsResponse.json();
+          setModels(modelsData);
         } else {
-          console.error('Error fetching models:', response.statusText);
+          console.error('Error fetching models:', modelsResponse.statusText);
+        }
+
+        const agentsResponse = await fetch(`${getBackendUrl()}/api/agents/`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (agentsResponse.ok) {
+          const agentsData = await agentsResponse.json();
+          setAgents(agentsData);
+        } else {
+          console.error('Error fetching agents:', agentsResponse.statusText);
         }
       } catch (error) {
-        console.error('Error fetching models:', error);
+        console.error('Error fetching models and agents:', error);
       }
     };
 
-    fetchModels();
+    fetchModelsAndAgents();
   }, [token]);
 
   useEffect(() => {
@@ -84,7 +104,7 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ conversationId }) => {
     };
 
     fetchApiKey();
-  }, [selectedModel, models, token]);
+  }, [selectedModel, selectedAgent, token]);
 
   useEffect(() => {
     // Fetch conversation details
@@ -132,21 +152,36 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ conversationId }) => {
     ]);
 
     try {
-      const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
+      let bodyContent;
+      let headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      };
+
+      if (selectedAgent !== '') {
+        bodyContent = {
+          inputs: newMessages.map(msg => ({ role: msg.role, content: msg.content })),
+          stream: false,
+          agent_id: selectedAgent,
+          store: false, // Do not store on Mistral's cloud
+        };
+      } else {
+        bodyContent = {
           model: selectedModel,
           messages: newMessages,
-        }),
+        };
+      }
+
+      const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(bodyContent),
       });
 
       if (response.ok) {
         const data = await response.json();
+        console.log("LLM response: ", data)
         const assistantMessage = data.choices[0].message.content;
 
         // Update messages with assistant response
@@ -202,15 +237,9 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ conversationId }) => {
     setIsEditingTitle(!isEditingTitle);
   };
 
-  function keyDownHandler(event: React.KeyboardEvent<HTMLInputElement>): void {
-    if (event.key === 'Enter') {
-      handleSendMessage();
-    }
-  }
-
   return (
     <div className="container flex-grow-1 mt-1" style={{ display: 'flex', flexDirection: 'column', height: '90vh', overflowY: 'hidden' }}>
-      <div className="d-flex align-items-center mb-3">
+      <div className="d-flex align-items-center mb-3 text-center">
         {isEditingTitle ? (
           <input
             type="text"
@@ -228,31 +257,10 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ conversationId }) => {
         )}
       </div>
       <div className="mb-3 d-flex align-items-center " style={{ display: 'flex', flexDirection: 'row' }}>
-        <label className="form-label me-2">Model</label>
-        <select
-          className="form-select me-2"
-          value={selectedModel}
-          onChange={(e) => setSelectedModel(e.target.value)}
-        >
-          {models.map((model) => (
-            <option key={model.name} value={model.name}>
-              {model.name}
-            </option>
-          ))}
-        </select>
-        <button
-          className="btn btn-secondary"
-          type="button"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-        >
-          <FaInfoCircle />
-        </button>
+
       </div>
-      {!isCollapsed && (
-        <div className="card card-body mb-3">
-          {models.find((model) => model.name === selectedModel)?.description}
-        </div>
-      )}
+
+
       <div className="chat-box flex-grow-1 border p-3" ref={chatBoxRef} style={{ overflowY: 'auto' }}>
         {messages.map((msg, index) => (
           <div key={index} className={`mb-2 ${msg.role === 'user' ? 'user-message' : 'chatbot-message'}`}>
@@ -261,14 +269,60 @@ const ChatComponent: React.FC<ChatComponentProps> = ({ conversationId }) => {
           </div>
         ))}
       </div>
+
+
+
       <div className="input-group mt-3">
-        <input
-          type="text"
+        <DropdownButton
+          title={<FaRobot />}
+
+          drop="up"
+        >
+          <Dropdown.Header>Select Model Or Agent</Dropdown.Header>
+          {models.map((model) => (
+            <Dropdown.Item key={model.name}>
+
+              <li
+                key={model.name}
+                className={`list-group-item list-group-item-action flex-column align-items-start ${selectedModel === model.name ? 'active' : ''}`}
+                onClick={() => {
+                  setSelectedModel(model.name);
+                  setSelectedAgent('');
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <h5 className="mb-1">{model.name}</h5>
+                <p className="mb-1 small">{model.description}</p>
+              </li>
+            </Dropdown.Item>
+          ))}
+          <Dropdown.Divider />
+          {agents.map((agent) => (
+            <Dropdown.Item key={agent.id}>
+
+              <li
+                key={agent.id}
+                className={`list-group-item list-group-item-action flex-column align-items-start ${selectedAgent === agent.id ? 'active' : ''}`}
+                onClick={() => {
+                  setSelectedAgent(agent.id);
+                  setSelectedModel('');
+                }}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className="d-flex w-100 justify-content-between">
+                  <h5 className="mb-1"></h5>
+                </div>
+                <p className="mb-1">{agent.description}</p>
+              </li>
+            </Dropdown.Item>
+          ))}
+
+        </DropdownButton>
+        <textarea
           className="form-control"
           placeholder="Type a message"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={keyDownHandler}
           disabled={isLoading} // Disable input when loading
         />
         <button className="btn btn-primary" onClick={handleSendMessage} disabled={isLoading}>

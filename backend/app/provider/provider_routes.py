@@ -1,8 +1,7 @@
-# backend/app/provider/provider_routes.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.provider import provider_schemas, provider_controller, model_controller
+from app.provider import provider_schemas, provider_controller, model_controller, agents_controller
 from app.user.user_controller import get_current_user
 from app.models.user_model import User
 from typing import List
@@ -64,3 +63,25 @@ def read_models(
     Retrieves all models.
     """
     return model_controller.get_models(db)
+
+@provider_router.get("/agents/", response_model=List[provider_schemas.Agent])
+def read_agents(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Retrieves all agents.
+    """
+    return agents_controller.get_agents(db)
+
+@provider_router.post("/agents/", response_model=provider_schemas.Agent)
+def create_agent(
+    agent: provider_schemas.AgentCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Creates a new agent.
+    """
+    print("create agent endpoint with: ", agent)
+    return agents_controller.create_agent(db=db, agent=agent)
